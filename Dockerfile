@@ -4,7 +4,7 @@ FROM pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
 WORKDIR /
 
 # Install git
-RUN apt-get update && apt-get install -y git
+RUN apt-get update && apt-get install -y git ffmpeg
 
 # Install python packages
 RUN pip3 install --upgrade pip
@@ -13,6 +13,9 @@ RUN pip3 install -r requirements.txt
 
 # We add the banana boilerplate here
 ADD server.py .
+
+# Get the MODEL_NAME ARG from the docker build command
+ENV MODEL_NAME=small
 
 # Add your model weight files 
 # (in this case we have a python script)

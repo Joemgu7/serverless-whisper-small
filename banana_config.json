@@ -1,0 +1,26 @@
+{
+    "name": "Whisper Small++",
+    "category": "Audio",
+    "example_input": {
+        "base64String":"<BASE64BYTESTRING>",
+        "format":"mp3",
+        "kwargs": {
+            "beam_size": 5,
+            "temperature": [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+        }
+    },
+    "example_output": {
+        "text": "This is the transcribed text.",
+        "segments": [
+            {
+                "id": 0,
+                "seek": 0,
+                "start": 0.0,
+                "end": 1.0,
+                "text": "This is the transcribed text."
+            }
+        ],
+        "language": "en"
+    },
+    "version": "1"
+  }

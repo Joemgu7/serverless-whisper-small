@@ -1,20 +1,58 @@
+# 🍌 Banana Whisper Small++
 
-# 🍌 Banana Serverless
+This is the ultimate production ready deployment of Whisper. It uses a custom build of Whisper, which is based on the latest Whisper release, but with a few modifications to make it run 10-20% faster than the stock whisper, without sacrificing quality of transcription 🤯
 
-This repo gives a framework to serve ML models in production using simple HTTP servers.
+It also has added flexibility, it can accept more parameters than the stock Whisper templates out there:
 
-# Quickstart
-**[Follow the quickstart guide in Banana's documentation to use this repo](https://docs.banana.dev/banana-docs/quickstart).** 
+- `base64String` - The base64 encoded audio file
+- `format` - The format of the audio file. Defaults to `mp3`
+- `kwargs` - A JSON string of additional arguments to pass to whisper.transcribe(). Defaults to `{}`. See the Whisper documentation for more information on the available arguments.
 
-*(choose "GitHub Repository" deployment method)*
+It not only returns the text in the result, but also segment information and language information.
 
-<br>
+## 🚀 Getting Started
 
-# Helpful Links
-Understand the 🍌 [Serverless framework](https://docs.banana.dev/banana-docs/core-concepts/inference-server/serverless-framework) and functionality of each file within it.
+On the client, call the model like so:
 
-Generalize this framework to [deploy anything on Banana](https://docs.banana.dev/banana-docs/resources/how-to-serve-anything-on-banana).
+```
+import banana_dev as banana
+import ffmpeg
+import base64
 
-<br>
+# read audio from video/audio and convert to opus with 16k sampling rate, mono channel, 48k bitrate, loglevel error
 
-## Use Banana for scale.
+input_path = "input.mp4"
+
+try:
+  out, _ = (
+      ffmpeg
+      .input(input_path)
+      .output('-', format='opus', acodec='libopus', ac=1, ar='16k', b='48k', loglevel='error')
+      .run(cmd=['ffmpeg', '-nostdin'], capture_stdout=True, capture_stderr=True)
+  )
+except Exception as e:
+  raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
+
+
+# HERE THE MAGIC HAPPENS
+
+opus_bytes_base64 = base64.b64encode(out).decode("ISO-8859-1")
+
+model_inputs = {
+  "base64String": opus_bytes_base64,
+  "format": "opus",
+  "kwargs": {
+    "beam_size": 4,
+    "temperature": [0.0, 0.2, 0.7],
+  }
+}
+
+api_key = "YOUR_API_KEY"
+model_key = "YOUR_MODEL_KEY"
+
+
+out = banana.run(api_key, model_key, model_inputs)
+result = out["modelOutputs"][0]
+
+# Use the result just as the standard whisper model output
+```
